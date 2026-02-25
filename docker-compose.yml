@@ -20,6 +20,8 @@ services:
   metabase:
     image: metabase/metabase:latest
     hostname: metabase-demo
+    extra_hosts:
+      - "metabase-demo:127.0.0.1"
     ports:
       - "3030:3000"
     environment:

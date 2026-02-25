@@ -31,7 +31,8 @@ This directory defines a minimal Metabase + Postgres stack that can be run local
    - `copy .env.example .env` (edit if needed)
    - `docker compose up -d`
 4. Import the analytics data into local Postgres so Metabase’s existing connection to database `apiary` has data:
-   - `.\scripts\import-to-local.ps1` (imports into database `apiary`)
+   - **PowerShell (Windows)**: `.\scripts\import-to-local.ps1`
+   - **Git Bash / Linux**: `./scripts/import-to-local.sh`
 5. Open Metabase at `http://localhost:3030`. Log in with your Apiary Metabase credentials; dashboards and the Apiary connection will match (pointing at local Postgres database `apiary`).
 
 **If you already ran this stack before** and see Postgres errors like `database "apiary" does not exist`, create the database once then re-import:

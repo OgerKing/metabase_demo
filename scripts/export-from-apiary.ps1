@@ -10,7 +10,9 @@ if (-not (Test-Path $SeedDir)) {
 }
 
 Write-Host "Exporting Postgres '$DbName' from Apiary stack to $SeedDir\hub_analytics.sql ..."
-docker compose -f $ApiaryComposePath exec -T postgres pg_dump -U $DbUser $DbName > "$SeedDir\hub_analytics.sql"
+# IMPORTANT: use UTF-8 so psql inside the container can read the dump without encoding errors.
+docker compose -f $ApiaryComposePath exec -T postgres pg_dump -U $DbUser $DbName |
+  Out-File -FilePath "$SeedDir\hub_analytics.sql" -Encoding utf8
 
 Write-Host "Copying Metabase H2 metabase.db from Apiary volume into $SeedDir ..."
 # Docker on Windows misparses "C:\..." in -v (colon = host:container). Use path Docker accepts.
