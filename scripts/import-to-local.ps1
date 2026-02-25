@@ -1,7 +1,7 @@
 Param(
     [string]$ComposeDir = "C:\Sites\metabase_demo",
     [string]$SeedSqlPathInContainer = "/seed/hub_analytics.sql",
-    [string]$DbName = "hub",
+    [string]$DbName = "apiary",
     [string]$DbUser = "apiary"
 )
 

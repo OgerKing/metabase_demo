@@ -52,8 +52,7 @@ scp -r -i "C:\path\to\your-key.pem" `
   C:\Sites\metabase_demo `
   ubuntu@EC2_PUBLIC_DNS:/home/ubuntu/metabase_demo
 ```
-
-Make sure `seed\metabase.db` and `seed\hub_analytics.sql` exist locally (run `scripts\export-from-apiary.ps1` first).
+If you want to reuse data from an existing Apiary stack, run `scripts\export-from-apiary.ps1` locally before copying so that `seed\metabase.db` and `seed\hub_analytics.sql` are populated. This is optional; the stack can also start fresh without these files.
 
 ### 4. Configure environment on EC2
 
@@ -69,7 +68,7 @@ Edit `.env` as needed:
 - Set a stronger `POSTGRES_PASSWORD`.
 - Optionally set `MB_SITE_URL` to `http://EC2_PUBLIC_DNS:3030`.
 
-### 5. Start the stack and import data on EC2
+### 5. Start the stack (and optionally import data) on EC2
 
 From `~/metabase_demo`:
 
@@ -77,17 +76,18 @@ From `~/metabase_demo`:
 docker compose up -d
 ```
 
-After Postgres is healthy, import the analytics dump:
+If you have a `seed/hub_analytics.sql` dump you want to load, import it after Postgres is healthy:
 
 ```bash
-docker compose exec -T postgres bash -c "psql -U apiary -d hub -f /seed/hub_analytics.sql"
+docker compose exec -T postgres bash -c "psql -U apiary -d apiary -f /seed/hub_analytics.sql"
 ```
 
-Metabase will use the copied `seed/metabase.db` automatically via the bind mount in `docker-compose.yml`.
+Metabase will use `seed/metabase.db` (if present) automatically via the bind mount in `docker-compose.yml`, or create a new application database file there on first run if it does not exist.
 
 ### 6. Access Metabase
 
 - Open `http://EC2_PUBLIC_DNS:3030` in your browser.
-- Log in with the same credentials you used in the Apiary Metabase (since we copied the H2 app DB).
-- Verify that your dashboards and questions are present and that they query the seeded `hub`/`analytics` data.
+- Complete the Metabase setup wizard to create an admin user.
+- Add a database connection pointing at the `postgres` service (host `postgres`, port `5432`) using the credentials from your `.env`.
+- If you imported seed data, verify that your dashboards and questions can query the seeded `hub`/`analytics` data.
 
