@@ -52,7 +52,7 @@ scp -r -i "C:\path\to\your-key.pem" `
   C:\Sites\metabase_demo `
   ubuntu@EC2_PUBLIC_DNS:/home/ubuntu/metabase_demo
 ```
-If you want to reuse data from an existing Apiary stack, run `scripts\export-from-apiary.ps1` locally before copying so that `seed\metabase.db` and `seed\hub_analytics.sql` are populated. This is optional; the stack can also start fresh without these files.
+If you want to reuse data from an existing Apiary stack, run `scripts\export-from-apiary.ps1` locally before copying so that `seed\metabase.db` and `seed\hub_analytics.sql` are populated. This is optional; the stack can also start fresh without these files. On EC2, make the import script executable: `chmod +x ~/metabase_demo/scripts/import-to-local.sh`.
 
 ### 4. Configure environment on EC2
 
@@ -68,7 +68,7 @@ Edit `.env` as needed:
 - Set a stronger `POSTGRES_PASSWORD`.
 - Optionally set `MB_SITE_URL` to `http://EC2_PUBLIC_DNS:3030`.
 
-### 5. Start the stack (and optionally import data) on EC2
+### 5. Start the stack and seed the database (optional)
 
 From `~/metabase_demo`:
 
@@ -76,11 +76,17 @@ From `~/metabase_demo`:
 docker compose up -d
 ```
 
-If you have a `seed/hub_analytics.sql` dump you want to load, import it after Postgres is healthy:
+**Seeding (optional):** If you copied `seed/hub_analytics.sql` (e.g. from a local Apiary export), you can seed the database after Postgres is healthy. On first boot, the init script in `init-db/` has already created the `apiary` database, so the import will succeed:
 
 ```bash
-docker compose exec -T postgres bash -c "psql -U apiary -d apiary -f /seed/hub_analytics.sql"
+./scripts/import-to-local.sh
 ```
+
+To seed the `hub` database as well (same data):  
+`docker compose exec -T postgres bash -c "psql -U apiary -d hub -f /seed/hub_analytics.sql"`
+
+Verify tables (e.g. in `apiary`):  
+`docker compose exec -T postgres psql -U apiary -d apiary -c "SELECT table_schema, COUNT(*) FROM information_schema.tables WHERE table_schema IN ('analytics','public') GROUP BY 1;"`
 
 Metabase will use `seed/metabase.db` (if present) automatically via the bind mount in `docker-compose.yml`, or create a new application database file there on first run if it does not exist.
 
